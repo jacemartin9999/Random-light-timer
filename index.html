@@ -64,10 +64,22 @@ input {
 </div>
 <script>
 let running = false;
+const greenAudio = new Audio("green-1.m4a");
+const redAudio = new Audio("red.m4a");
 
 function speak(text) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    speechSynthesis.speak(utterance);
+
+    if (text === "GREEN LIGHT") {
+        greenAudio.currentTime = 0;
+        greenAudio.play();
+    }
+
+    if (text === "RED LIGHT") {
+        redAudio.currentTime = 0;
+        redAudio.play();
+    }
+
+}
 }
 
 function randomBetween(min, max) {
