@@ -1,135 +1,132 @@
-<! DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF—8">
-‹meta name="viewport"
-content="width=device-width,
-initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Random Light Timer</title>
 <style>
 html, body {
-margin: 0; padding: 0; width: 100%; height: 100%;
-overflow: hidden;
-font-family: -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, sans-serif;
 }
+
 body {
-display: flex;
-justify-content: center; align-items: center;
-transition: background-color 0.5s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.5s;
 }
+
 #container {
-text-align: center;
-color: white;
+    text-align: center;
+    color: white;
 }
+
 #state {
-font-size: 12vw; font-weight: bold;
+    font-size: 12vw;
+    font-weight: bold;
 }
+
 #timer {
-font-size:
-20vw;
-font-weight: bold;
-JS
-Result
+    font-size: 20vw;
+    font-weight: bold;
 }
+
 #controls {
-position: absolute;
-top: 20px; left: 20px;
-color: white; font-size: 18px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-size: 18px;
 }
+
 input {
-width: 70px; font-size: 18px;
+    width: 70px;
+    font-size: 18px;
 }
-</ style> </head>
+</style>
+</head>
 <body>
 <div id="controls">
-Min:
-<input id="min" type="number" value="15"›
-Max:
-<input id="max" type="number" value="90"> <button onclick="start()">Start</button>
+    Min:
+    <input id="min" type="number" value="15">
+    Max:
+    <input id="max" type="number" value="90">
+    <button onclick="start()">Start</button>
 </div>
 <div id="container">
-<div id="state">READY</div>
-<div id="timer">0</div>
-</div><script>
+    <div id="state">READY</div>
+    <div id="timer">0</div>
+</div>
+<script>
 let running = false;
-let currentTimeout;
-function speak (text) {
-const utterance = new SpeechSynthesisUtterance(text);
-speechSynthesis. speak (utterance);
+
+function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(utterance);
 }
+
+function randomBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-function randomBetween (min, max){
-return Math.floor(Math.random()*(max-min+1))+min;
-async function cycle(){
-while(running){
-await phase("GREEN LIGHT", "green"); await phase("RED LIGHT", " red");
+
+async function cycle() {
+    while (running) {
+        await phase("GREEN LIGHT", "green");
+        await phase("RED LIGHT", "red");
+    }
 }
+
+function phase(text, color) {
+    return new Promise(resolve => {
+
+        document.body.style.backgroundColor = color;
+
+        document.getElementById("state").innerText = text;
+
+        speak(text);
+
+        let min = parseInt(document.getElementById("min").value);
+        let max = parseInt(document.getElementById("max").value);
+
+        let duration = randomBetween(min, max);
+
+        let remaining = duration;
+
+        document.getElementById("timer").innerText = remaining;
+
+        const interval = setInterval(() => {
+
+            remaining--;
+
+            document.getElementById("timer").innerText = remaining;
+
+            if (remaining <= 0) {
+
+                clearInterval(interval);
+
+                resolve();
+
+            }
+
+        }, 1000);
+
+    });
 }
-function phase(text, color){
-return new Promise(resolve => {
-document.body.style.backgroundColor = color;
-document.getElementById("state"). innerText =
-text;
-speak (text);
-let min =
-parseInt(document-getElementById("min"). value) ;
-let max =
-parseInt(document.getElementById("max"). value) ;
-let duration = randomBetween (min, max);
-let remaining = duration;
-document. getElementById("timer"). innerText =
-remaining;
-V
-const interval = setInterval(() => {
-remaining--;
-document.getElementById("timer").innerText =
-remaining;
-CSS
-JS
-Result
-if (remaining <= 0){
-clearInterval( interval);
-resolve();
-}, 1000);
-}) ;
-}
-function start () {
-await phase("GREEN LIGHT", "green"); await phase("RED LIGHT", " red");
-}
-}
-function phase(text, color){
-return new Promise(resolve => {
-document.body.style.backgroundColor = color;
-document.getElementById("state"). innerText =
-text;
-speak (text);
-let min =
-parseInt(document-getElementById("min"). value) ;
-let max =
-parseInt(document.getElementById("max"). value) ;
-let duration = randomBetween (min, max);
-let remaining = duration;
-document. getElementById("timer"). innerText =
-remaining;
-V
-const interval = setInterval(() => {
-remaining--;
-document.getElementById("timer").innerText =
-remaining;
-CSS
-JS
-Result
-if (remaining <= 0){
-clearInterval( interval);
-resolve();
-}, 1000);
-}) ;
-}
-function start () {
-if(running) return;
-running = true;
-cycle();
-Result
+
+function start() {
+
+    if (running) return;
+
+    running = true;
+
+    cycle();
+
 }
 </script>
-</body> </html>
+</body>
+</html>
