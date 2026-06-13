@@ -71,42 +71,29 @@ input {
 let running = false;
 
 /* =========================
-   AUDIO FILES
+   AUDIO FILES (YOUR VOICES)
 ========================= */
-const greenLightSound = new Audio(
-    "https://jacemartin9999.github.io/Random-light-timer/green-light.m4a"
-);
-
-const redLightSound = new Audio(
-    "https://jacemartin9999.github.io/Random-light-timer/red-light.m4a"
-);
+const greenLightUrl = "https://jacemartin9999.github.io/Random-light-timer/green-light.m4a";
+const redLightUrl = "https://jacemartin9999.github.io/Random-light-timer/red-light.m4a";
 
 /* =========================
-   SPEECH (FIXED - NO QUEUE BUG)
+   PLAY SOUND FUNCTION (SAFE)
 ========================= */
-function speak(text) {
+function playSound(url) {
+    const audio = new Audio(url);
+    audio.currentTime = 0;
 
-    // 🔥 kill any existing speech instantly
-    speechSynthesis.cancel();
+    const playPromise = audio.play();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-
-    const voices = speechSynthesis.getVoices();
-
-    const selectedVoice =
-        voices.find(v => v.name.includes("Samantha")) ||
-        voices.find(v => v.lang === "en-US") ||
-        voices[0];
-
-    if (selectedVoice) {
-        utterance.voice = selectedVoice;
+    if (playPromise !== undefined) {
+        playPromise.catch(err => {
+            console.log("Audio blocked:", err);
+        });
     }
-
-    speechSynthesis.speak(utterance);
 }
 
 /* =========================
-   RANDOM NUMBER
+   RANDOM TIMER
 ========================= */
 function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -123,30 +110,23 @@ async function cycle() {
 }
 
 /* =========================
-   PHASE SYSTEM
+   PHASE LOGIC
 ========================= */
 function phase(text, color) {
     return new Promise(resolve => {
 
-        // 🔥 extra safety: prevent speech stacking
-        speechSynthesis.cancel();
-
         document.body.style.backgroundColor = color;
         document.getElementById("state").innerText = text;
 
-        speak(text);
-
         /* =========================
-           AUDIO TRIGGERS
+           PLAY YOUR AUDIO ONLY
         ========================= */
         if (text === "GREEN LIGHT") {
-            greenLightSound.currentTime = 0;
-            greenLightSound.play();
+            playSound(greenLightUrl);
         }
 
         if (text === "RED LIGHT") {
-            redLightSound.currentTime = 0;
-            redLightSound.play();
+            playSound(redLightUrl);
         }
 
         let min = parseInt(document.getElementById("min").value);
@@ -172,22 +152,15 @@ function phase(text, color) {
 }
 
 /* =========================
-   START (iPHONE AUDIO FIX)
-========================= */
+   START BUTTON
+   ========================= */
 function start() {
 
     if (running) return;
 
-    // 🔓 unlock audio on mobile
-    greenLightSound.play().then(() => {
-        greenLightSound.pause();
-        greenLightSound.currentTime = 0;
-    }).catch(() => {});
-
-    redLightSound.play().then(() => {
-        redLightSound.pause();
-        redLightSound.currentTime = 0;
-    }).catch(() => {});
+    /* 🔓 unlock audio for iPhone */
+    playSound(greenLightUrl);
+    playSound(redLightUrl);
 
     running = true;
     cycle();
