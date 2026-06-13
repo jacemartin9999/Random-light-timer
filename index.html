@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Random Light Timer</title>
+
 <style>
 html, body {
     margin: 0;
@@ -50,7 +51,9 @@ input {
 }
 </style>
 </head>
+
 <body>
+
 <div id="controls">
     Min:
     <input id="min" type="number" value="15">
@@ -58,20 +61,40 @@ input {
     <input id="max" type="number" value="90">
     <button onclick="start()">Start</button>
 </div>
+
 <div id="container">
     <div id="state">READY</div>
     <div id="timer">0</div>
 </div>
+
 <script>
 let running = false;
+
+/* =========================
+   AUDIO SETUP
+========================= */
+const greenLightSound = new Audio(
+    "https://jacemartin9999.github.io/Random-light-timer/green-light.m4a"
+);
+
+/* =========================
+   SPEECH FUNCTION
+========================= */
 function speak(text) {
     const utterance = new SpeechSynthesisUtterance(text);
     speechSynthesis.speak(utterance);
 }
+
+/* =========================
+   RANDOM TIMER
+========================= */
 function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/* =========================
+   MAIN LOOP
+========================= */
 async function cycle() {
     while (running) {
         await phase("GREEN LIGHT", "green");
@@ -79,20 +102,27 @@ async function cycle() {
     }
 }
 
+/* =========================
+   PHASE HANDLER
+========================= */
 function phase(text, color) {
     return new Promise(resolve => {
 
         document.body.style.backgroundColor = color;
-
         document.getElementById("state").innerText = text;
 
         speak(text);
+
+        // 👉 AUDIO TRIGGER (GREEN ONLY)
+        if (text === "GREEN LIGHT") {
+            greenLightSound.currentTime = 0;
+            greenLightSound.play();
+        }
 
         let min = parseInt(document.getElementById("min").value);
         let max = parseInt(document.getElementById("max").value);
 
         let duration = randomBetween(min, max);
-
         let remaining = duration;
 
         document.getElementById("timer").innerText = remaining;
@@ -100,31 +130,37 @@ function phase(text, color) {
         const interval = setInterval(() => {
 
             remaining--;
-
             document.getElementById("timer").innerText = remaining;
 
             if (remaining <= 0) {
-
                 clearInterval(interval);
-
                 resolve();
-
             }
 
         }, 1000);
-
     });
 }
 
+/* =========================
+   START BUTTON
+   (IMPORTANT FOR iPHONE AUDIO)
+========================= */
 function start() {
 
     if (running) return;
 
+    // 🔊 unlock audio for mobile browsers
+    greenLightSound.play().then(() => {
+        greenLightSound.pause();
+        greenLightSound.currentTime = 0;
+    }).catch(() => {
+        // ignore autoplay block
+    });
+
     running = true;
-
     cycle();
-
 }
 </script>
+
 </body>
 </html>
