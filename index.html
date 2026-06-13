@@ -22,19 +22,16 @@ body {
     transition: background-color 0.5s;
 }
 
-#container {
-    text-align: center;
-    color: white;
-}
-
 #state {
     font-size: 12vw;
     font-weight: bold;
+    color: white;
 }
 
 #timer {
     font-size: 20vw;
     font-weight: bold;
+    color: white;
 }
 
 #controls {
@@ -42,12 +39,6 @@ body {
     top: 20px;
     left: 20px;
     color: white;
-    font-size: 18px;
-}
-
-input {
-    width: 70px;
-    font-size: 18px;
 }
 </style>
 </head>
@@ -62,73 +53,59 @@ input {
     <button onclick="start()">Start</button>
 </div>
 
-<div id="container">
-    <div id="state">READY</div>
-    <div id="timer">0</div>
-</div>
+<div id="state">READY</div>
+<div id="timer">0</div>
 
 <script>
 let running = false;
 
 /* =========================
-   AUDIO URLs (YOUR VOICES)
+   AUDIO ENGINE (IMPORTANT FIX)
 ========================= */
-const greenLightUrl = "https://jacemartin9999.github.io/Random-light-timer/green-light.m4a";
-const redLightUrl = "https://jacemartin9999.github.io/Random-light-timer/red-light.m4a";
+const greenAudio = new Audio("https://jacemartin9999.github.io/Random-light-timer/green-light.m4a");
+const redAudio = new Audio("https://jacemartin9999.github.io/Random-light-timer/red-light.m4a");
 
-/* =========================
-   SAFE AUDIO PLAY (NO BUGS)
-========================= */
-function playSound(url) {
+greenAudio.preload = "auto";
+redAudio.preload = "auto";
 
-    const audio = new Audio(url);
-
-    audio.preload = "auto";
-    audio.currentTime = 0;
-
-    const playPromise = audio.play();
-
-    if (playPromise !== undefined) {
-        playPromise.catch(err => {
-            console.log("Audio blocked:", err);
-        });
+/* 🔥 IMPORTANT: keep ONLY ONE instance alive */
+function play(audio) {
+    try {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.play();
+    } catch (e) {
+        console.log(e);
     }
 }
 
 /* =========================
-   RANDOM NUMBER
+   RANDOM TIMER
 ========================= */
 function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 /* =========================
-   MAIN LOOP
+   LOOP
 ========================= */
 async function cycle() {
     while (running) {
-        await phase("GREEN LIGHT", "green");
-        await phase("RED LIGHT", "red");
+        await phase("GREEN LIGHT", "green", greenAudio);
+        await phase("RED LIGHT", "red", redAudio);
     }
 }
 
 /* =========================
-   PHASE SYSTEM
+   PHASE
 ========================= */
-function phase(text, color) {
+function phase(text, color, audio) {
     return new Promise(resolve => {
 
         document.body.style.backgroundColor = color;
         document.getElementById("state").innerText = text;
 
-        /* 🔥 PLAY YOUR AUDIO (FRESH EACH TIME) */
-        if (text === "GREEN LIGHT") {
-            playSound(greenLightUrl);
-        }
-
-        if (text === "RED LIGHT") {
-            playSound(redLightUrl);
-        }
+        play(audio);
 
         let min = parseInt(document.getElementById("min").value);
         let max = parseInt(document.getElementById("max").value);
@@ -153,15 +130,15 @@ function phase(text, color) {
 }
 
 /* =========================
-   START BUTTON (iOS FIX)
+   START (CRITICAL UNLOCK FIX)
 ========================= */
 function start() {
 
     if (running) return;
 
-    /* 🔓 unlock audio for iPhone */
-    playSound(greenLightUrl);
-    playSound(redLightUrl);
+    /* 🔥 THIS UNLOCKS AUDIO ENGINE PROPERLY */
+    play(greenAudio);
+    play(redAudio);
 
     running = true;
     cycle();
