@@ -60,26 +60,27 @@ body {
 let running = false;
 
 /* =========================
-   AUDIO FILES
+   AUDIO ENGINE (IMPORTANT FIX)
 ========================= */
 const greenAudio = new Audio("https://jacemartin9999.github.io/Random-light-timer/green-light.m4a");
 const redAudio = new Audio("https://jacemartin9999.github.io/Random-light-timer/red-light.m4a");
 
-/* =========================
-   SAFE PLAY FUNCTION
-========================= */
-function play(audio) {
-    audio.pause();
-    audio.currentTime = 0;
+greenAudio.preload = "auto";
+redAudio.preload = "auto";
 
-    const p = audio.play();
-    if (p !== undefined) {
-        p.catch(() => {});
+/* 🔥 IMPORTANT: keep ONLY ONE instance alive */
+function play(audio) {
+    try {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.play();
+    } catch (e) {
+        console.log(e);
     }
 }
 
 /* =========================
-   RANDOM
+   RANDOM TIMER
 ========================= */
 function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -129,22 +130,15 @@ function phase(text, color, audio) {
 }
 
 /* =========================
-   START (CRITICAL IOS AUDIO UNLOCK)
+   START (CRITICAL UNLOCK FIX)
 ========================= */
 function start() {
 
     if (running) return;
 
-    /* 🔥 MUST be inside user gesture */
-    greenAudio.play().then(() => {
-        greenAudio.pause();
-        greenAudio.currentTime = 0;
-    }).catch(() => {});
-
-    redAudio.play().then(() => {
-        redAudio.pause();
-        redAudio.currentTime = 0;
-    }).catch(() => {});
+    /* 🔥 THIS UNLOCKS AUDIO ENGINE PROPERLY */
+    play(greenAudio);
+    play(redAudio);
 
     running = true;
     cycle();
