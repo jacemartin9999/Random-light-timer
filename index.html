@@ -71,16 +71,19 @@ input {
 let running = false;
 
 /* =========================
-   AUDIO FILES (YOUR VOICES)
+   AUDIO URLs (YOUR VOICES)
 ========================= */
 const greenLightUrl = "https://jacemartin9999.github.io/Random-light-timer/green-light.m4a";
 const redLightUrl = "https://jacemartin9999.github.io/Random-light-timer/red-light.m4a";
 
 /* =========================
-   PLAY SOUND FUNCTION (SAFE)
+   SAFE AUDIO PLAY (NO BUGS)
 ========================= */
 function playSound(url) {
+
     const audio = new Audio(url);
+
+    audio.preload = "auto";
     audio.currentTime = 0;
 
     const playPromise = audio.play();
@@ -93,7 +96,7 @@ function playSound(url) {
 }
 
 /* =========================
-   RANDOM TIMER
+   RANDOM NUMBER
 ========================= */
 function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -110,7 +113,7 @@ async function cycle() {
 }
 
 /* =========================
-   PHASE LOGIC
+   PHASE SYSTEM
 ========================= */
 function phase(text, color) {
     return new Promise(resolve => {
@@ -118,9 +121,7 @@ function phase(text, color) {
         document.body.style.backgroundColor = color;
         document.getElementById("state").innerText = text;
 
-        /* =========================
-           PLAY YOUR AUDIO ONLY
-        ========================= */
+        /* 🔥 PLAY YOUR AUDIO (FRESH EACH TIME) */
         if (text === "GREEN LIGHT") {
             playSound(greenLightUrl);
         }
@@ -152,8 +153,8 @@ function phase(text, color) {
 }
 
 /* =========================
-   START BUTTON
-   ========================= */
+   START BUTTON (iOS FIX)
+========================= */
 function start() {
 
     if (running) return;
