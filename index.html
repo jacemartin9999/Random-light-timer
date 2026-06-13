@@ -134,11 +134,10 @@ function phase(text, color, audio) {
 ========================= */
     function start() {
 
-        console.log("START CLICKED");
-        
+    document.getElementById("state").innerText = "START CLICKED";
+
     if (running) return;
 
-    // 🔓 SIMPLE iOS AUDIO UNLOCK (must be synchronous style)
     greenAudio.play();
     redAudio.play();
 
@@ -152,14 +151,6 @@ function phase(text, color, audio) {
     cycle();
 }
     
-}
-
-    /* 🔥 THIS UNLOCKS AUDIO ENGINE PROPERLY */
-    play(greenAudio);
-    play(redAudio);
-
-    running = true;
-    cycle();
 }
 </script>
 
