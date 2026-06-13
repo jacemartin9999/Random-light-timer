@@ -71,22 +71,42 @@ input {
 let running = false;
 
 /* =========================
-   AUDIO SETUP
+   AUDIO FILES
 ========================= */
 const greenLightSound = new Audio(
     "https://jacemartin9999.github.io/Random-light-timer/green-light.m4a"
 );
 
+const redLightSound = new Audio(
+    "https://jacemartin9999.github.io/Random-light-timer/red-light.m4a"
+);
+
 /* =========================
-   SPEECH FUNCTION
+   SPEECH (FIXED - NO QUEUE BUG)
 ========================= */
 function speak(text) {
+
+    // 🔥 kill any existing speech instantly
+    speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(text);
+
+    const voices = speechSynthesis.getVoices();
+
+    const selectedVoice =
+        voices.find(v => v.name.includes("Samantha")) ||
+        voices.find(v => v.lang === "en-US") ||
+        voices[0];
+
+    if (selectedVoice) {
+        utterance.voice = selectedVoice;
+    }
+
     speechSynthesis.speak(utterance);
 }
 
 /* =========================
-   RANDOM TIMER
+   RANDOM NUMBER
 ========================= */
 function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -103,20 +123,30 @@ async function cycle() {
 }
 
 /* =========================
-   PHASE HANDLER
+   PHASE SYSTEM
 ========================= */
 function phase(text, color) {
     return new Promise(resolve => {
+
+        // 🔥 extra safety: prevent speech stacking
+        speechSynthesis.cancel();
 
         document.body.style.backgroundColor = color;
         document.getElementById("state").innerText = text;
 
         speak(text);
 
-        // 👉 AUDIO TRIGGER (GREEN ONLY)
+        /* =========================
+           AUDIO TRIGGERS
+        ========================= */
         if (text === "GREEN LIGHT") {
             greenLightSound.currentTime = 0;
             greenLightSound.play();
+        }
+
+        if (text === "RED LIGHT") {
+            redLightSound.currentTime = 0;
+            redLightSound.play();
         }
 
         let min = parseInt(document.getElementById("min").value);
@@ -142,20 +172,22 @@ function phase(text, color) {
 }
 
 /* =========================
-   START BUTTON
-   (IMPORTANT FOR iPHONE AUDIO)
+   START (iPHONE AUDIO FIX)
 ========================= */
 function start() {
 
     if (running) return;
 
-    // 🔊 unlock audio for mobile browsers
+    // 🔓 unlock audio on mobile
     greenLightSound.play().then(() => {
         greenLightSound.pause();
         greenLightSound.currentTime = 0;
-    }).catch(() => {
-        // ignore autoplay block
-    });
+    }).catch(() => {});
+
+    redLightSound.play().then(() => {
+        redLightSound.pause();
+        redLightSound.currentTime = 0;
+    }).catch(() => {});
 
     running = true;
     cycle();
