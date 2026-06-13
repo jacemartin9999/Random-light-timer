@@ -22,19 +22,16 @@ body {
     transition: background-color 0.5s;
 }
 
-#container {
-    text-align: center;
-    color: white;
-}
-
 #state {
     font-size: 12vw;
     font-weight: bold;
+    color: white;
 }
 
 #timer {
     font-size: 20vw;
     font-weight: bold;
+    color: white;
 }
 
 #controls {
@@ -42,12 +39,6 @@ body {
     top: 20px;
     left: 20px;
     color: white;
-    font-size: 18px;
-}
-
-input {
-    width: 70px;
-    font-size: 18px;
 }
 </style>
 </head>
@@ -62,17 +53,14 @@ input {
     <button onclick="start()">Start</button>
 </div>
 
-<div id="container">
-    <div id="state">READY</div>
-    <div id="timer">0</div>
-</div>
+<div id="state">READY</div>
+<div id="timer">0</div>
 
 <script>
 let running = false;
-let firstRun = true;
 
 /* =========================
-   AUDIO (YOUR VOICE FILES)
+   AUDIO FILES
 ========================= */
 const greenAudio = new Audio("https://jacemartin9999.github.io/Random-light-timer/green-light.m4a");
 const redAudio = new Audio("https://jacemartin9999.github.io/Random-light-timer/red-light.m4a");
@@ -81,15 +69,17 @@ const redAudio = new Audio("https://jacemartin9999.github.io/Random-light-timer/
    SAFE PLAY FUNCTION
 ========================= */
 function play(audio) {
-    try {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.play();
-    } catch (e) {}
+    audio.pause();
+    audio.currentTime = 0;
+
+    const p = audio.play();
+    if (p !== undefined) {
+        p.catch(() => {});
+    }
 }
 
 /* =========================
-   RANDOM NUMBER
+   RANDOM
 ========================= */
 function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -100,30 +90,21 @@ function randomBetween(min, max) {
 ========================= */
 async function cycle() {
     while (running) {
-        await phase("GREEN LIGHT", "green");
-        await phase("RED LIGHT", "red");
+        await phase("GREEN LIGHT", "green", greenAudio);
+        await phase("RED LIGHT", "red", redAudio);
     }
 }
 
 /* =========================
-   PHASE SYSTEM
+   PHASE
 ========================= */
-function phase(text, color) {
+function phase(text, color, audio) {
     return new Promise(resolve => {
 
         document.body.style.backgroundColor = color;
         document.getElementById("state").innerText = text;
 
-        /* =========================
-           AUDIO (FIXED START BUG)
-        ========================= */
-        if (text === "GREEN LIGHT") {
-            if (!firstRun) play(greenAudio);
-        }
-
-        if (text === "RED LIGHT") {
-            if (!firstRun) play(redAudio);
-        }
+        play(audio);
 
         let min = parseInt(document.getElementById("min").value);
         let max = parseInt(document.getElementById("max").value);
@@ -140,7 +121,6 @@ function phase(text, color) {
 
             if (remaining <= 0) {
                 clearInterval(interval);
-                firstRun = false;
                 resolve();
             }
 
@@ -149,11 +129,22 @@ function phase(text, color) {
 }
 
 /* =========================
-   START BUTTON
+   START (CRITICAL IOS AUDIO UNLOCK)
 ========================= */
 function start() {
 
     if (running) return;
+
+    /* 🔥 MUST be inside user gesture */
+    greenAudio.play().then(() => {
+        greenAudio.pause();
+        greenAudio.currentTime = 0;
+    }).catch(() => {});
+
+    redAudio.play().then(() => {
+        redAudio.pause();
+        redAudio.currentTime = 0;
+    }).catch(() => {});
 
     running = true;
     cycle();
