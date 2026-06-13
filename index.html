@@ -136,21 +136,20 @@ function phase(text, color, audio) {
 
     if (running) return;
 
-    // 🔓 unlock audio WITHOUT audible playback
-    try {
-        greenAudio.play().then(() => {
-            greenAudio.pause();
-            greenAudio.currentTime = 0;
-        }).catch(() => {});
+    // 🔓 SIMPLE iOS AUDIO UNLOCK (must be synchronous style)
+    greenAudio.play();
+    redAudio.play();
 
-        redAudio.play().then(() => {
-            redAudio.pause();
-            redAudio.currentTime = 0;
-        }).catch(() => {});
-    } catch (e) {}
+    greenAudio.pause();
+    redAudio.pause();
+
+    greenAudio.currentTime = 0;
+    redAudio.currentTime = 0;
 
     running = true;
     cycle();
+}
+    
 }
 
     /* 🔥 THIS UNLOCKS AUDIO ENGINE PROPERLY */
