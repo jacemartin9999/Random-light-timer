@@ -132,9 +132,26 @@ function phase(text, color, audio) {
 /* =========================
    START (CRITICAL UNLOCK FIX)
 ========================= */
-function start() {
+    function start() {
 
     if (running) return;
+
+    // 🔓 unlock audio WITHOUT audible playback
+    try {
+        greenAudio.play().then(() => {
+            greenAudio.pause();
+            greenAudio.currentTime = 0;
+        }).catch(() => {});
+
+        redAudio.play().then(() => {
+            redAudio.pause();
+            redAudio.currentTime = 0;
+        }).catch(() => {});
+    } catch (e) {}
+
+    running = true;
+    cycle();
+}
 
     /* 🔥 THIS UNLOCKS AUDIO ENGINE PROPERLY */
     play(greenAudio);
